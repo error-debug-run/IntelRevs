@@ -2,9 +2,22 @@
 
 from typing import Optional, Dict
 
+from src.core.services.scraper_client import fetch_reviews
 from src.core.ocr.main import process_image
 from src.core.scraping.main import fetch_reviews_from_url
 from src.core.nlp.main import analyze_review_text
+
+def run_pipeline(product_url: str):
+    scrape_data = fetch_reviews(product_url)
+
+    reviews = scrape_data['reviews']
+
+    return {
+        "url": product_url,
+        "reviews": reviews,
+        "review_count": len(reviews),
+        "sample": reviews[3],
+    }
 
 def is_url(input_text: str) -> bool:
     return input_text.startswith("http://") or input_text.startswith("https://")
