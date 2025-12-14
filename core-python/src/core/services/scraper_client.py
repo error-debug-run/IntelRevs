@@ -1,7 +1,7 @@
 import requests
 
 
-GO_SCRAPER_URL = "https://localhost:8080/v1/scraper"
+GO_SCRAPER_URL = "http://localhost:8080/v1/scraper"
 
 def fetch_reviews(url: str) -> dict:
 

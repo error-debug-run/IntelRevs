@@ -14,7 +14,7 @@ type ScrapeRequest struct {
 func main() {
 	e := echo.New()
 
-	e.GET("/v1/scrape", func(c echo.Context) error {
+	e.GET("/v1/scraper", func(c echo.Context) error {
 		req := new(ScrapeRequest)
 		if err := c.Bind(req); err != nil || req.URL == "" {
 			return c.JSON(http.StatusBadRequest, map[string]string{

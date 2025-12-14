@@ -7,6 +7,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+type Parser interface {
+	parse(html string) ([]string, error)
+}
+
 func ExtractReviews(html string) ([]string, error) {
 	if html == "" {
 		return nil, errors.New("empty HTML")
