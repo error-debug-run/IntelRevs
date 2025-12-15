@@ -8,7 +8,7 @@ import (
 )
 
 type Parser interface {
-	parse(html string) ([]string, error)
+	Parse(html string) ([]string, error)
 }
 
 func ExtractReviews(html string) ([]string, error) {
@@ -24,7 +24,7 @@ func ExtractReviews(html string) ([]string, error) {
 	var reviews []string
 
 	// placeholder selectors for now
-	doc.Find(".review, .customer-review, .a-size-base").Each(func(i int, s *goquery.Selection) {
+	doc.Find("div.quote span.text").Each(func(i int, s *goquery.Selection) {
 		text := strings.TrimSpace(s.Text())
 		if text != "" {
 			reviews = append(reviews, text)

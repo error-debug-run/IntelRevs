@@ -1,13 +1,13 @@
 package manager
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/error-debug-run/go-scraper/internal/detector"
-)
-
-import (
 	"github.com/error-debug-run/go-scraper/internal/parser"
+	"github.com/error-debug-run/go-scraper/internal/parser/site_alloc"
 	"github.com/error-debug-run/go-scraper/internal/worker"
 )
 
@@ -19,39 +19,65 @@ type ScrapeResult struct {
 }
 
 func RunScrapeJob(url string) (*ScrapeResult, error) {
+	if url == "" {
+		return nil, errors.New("empty url")
+	}
 
 	site := detector.DetectSite(url)
 
 	var p parser.Parser
-
 	switch site {
 	case detector.SiteAmazon:
-		p = parser.NewGenericParser() // placeholder
+		p = site_alloc.NewAmazonParser()
 	case detector.SiteReddit:
-		p = parser.NewGenericParser() // placeholder
+		p = site_alloc.NewRedditParser()
+	case detector.SiteFlipkart:
+		p = site_alloc.NewFlipkartParser()
 	default:
-		p = parser.NewGenericParser()
+		p = site_alloc.NewGenericParser()
 	}
 
-	rawHTML, err := worker.FetchPage(url)
-	if err != nil {
-		return nil, err
-	}
+	w := worker.NewHTTPWorker()
 
-	reviews, err := parser.ExtractReviews(rawHTML)
-	if err != nil {
-		return nil, err
-	}
+	var allReviews []string
+	currentURL := url
 
-	if reviews == nil {
-		reviews = []string{}
+	const maxPages = 10
+	pageCount := 0
+
+	for {
+		if pageCount >= maxPages {
+			break
+		}
+
+		html, err := w.FetchHTML(currentURL)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println("Fetched HTML length:", len(html))
+
+		reviews, err := p.Parse(html)
+		if err != nil {
+			return nil, err
+		}
+		println("PARSED REVIEWS COUNT:", len(reviews))
+		println("HTML LENGTH:", len(html))
+
+		allReviews = append(allReviews, reviews...)
+
+		next := parser.FindNextPage(html)
+		if next == "" {
+			break
+		}
+
+		currentURL = resolveURL(currentURL, next)
+		pageCount++
 	}
 
 	return &ScrapeResult{
 		URL:       url,
-		Reviews:   reviews,
-		Source:    "generic",
+		Reviews:   allReviews,
+		Source:    string(site),
 		Timestamp: time.Now().Unix(),
 	}, nil
-
 }

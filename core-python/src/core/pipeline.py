@@ -32,6 +32,17 @@ async def run_pipeline(input_data: str) -> Dict[str, Any]:
         "review_count": 0,
     }
 
+    def normalize_reviews(reviews):
+        if not reviews:
+            return []
+        if isinstance(reviews, list):
+            return [str(r) for r in reviews]
+        if isinstance(reviews, str):
+            return [reviews]
+        if isinstance(reviews, dict):
+            return [str(v) for v in reviews.values()]
+        return []
+
     # -------- URL input --------
     if is_url(input_data):
         result["input_type"] = "url"
@@ -39,6 +50,9 @@ async def run_pipeline(input_data: str) -> Dict[str, Any]:
         scrape_data = fetch_reviews(input_data)
         reviews: List[str] = scrape_data.get("reviews", [])
 
+
+
+        reviews = normalize_reviews(scrape_data.get("reviews"))
         combined_text = "\n".join(reviews)
 
         result["raw_text"] = combined_text
