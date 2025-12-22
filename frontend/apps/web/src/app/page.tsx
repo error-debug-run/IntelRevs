@@ -1,40 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import AnalyzeForm from "@/components/AnalyzeForm";
+import ResultPanel from "@/components/ResultPanel";
+import { analyzeReal, fakeAnalyze } from "@/lib/api";
+
 
 export default function Home() {
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-    const [input, setInput] = useState("");
-    const [submitted, setSubmitted] = useState("");
+  async function handleAnalyze(input: string) {
+    setLoading(true);
+    setResult(null);
 
-    return (
-        <main style={{padding: "2rem"}}>
-            <h1>IntelRevs</h1>
+    try {
+        const data =
+            process.env.NODE_ENV === "development"
+            ? await fakeAnalyze(input)
+            : await analyzeReal(input);
+        setResult(data);
+      } finally {
+        setLoading(false);
+      }
+  }
 
-            <textarea
-                placeholder="Paste a product URL or review text"
-                style={{width: "100%", height: "100px"}}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-            />
+  return (
+    <main style={{ padding: "2rem" }}>
+      <h1>IntelRevs</h1>
 
-            <br/>
-            <br/>
+      <AnalyzeForm onAnalyze={handleAnalyze} />
 
-            <button
-                style={{ cursor:"pointer" }}
-                onClick={() => setSubmitted(input)}
-            >
-                Analyze
-            </button>
+      {loading && <p>Analyzing…</p>}
 
-            {submitted && (
-                <>
-                    <hr style={{margin:"2rem 0"}} />
-                    <h3>Submitted Input</h3>
-                    <pre>{submitted}</pre>
-                </>
-            )}
-        </main>
-    );
+      {result && <ResultPanel result={result} />}
+    </main>
+  );
 }
