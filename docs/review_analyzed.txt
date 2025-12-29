@@ -1,0 +1,30 @@
+What a typical log file for a review after being analyzed will look like -->
+
+{
+  "input_type": "url",
+  "source": "amazon",
+  "review_count": 312,
+  "analysis_id": "uuid-v4",
+  "schema_version": "1.0.0",
+  "timestamp": 1765658720,
+  "language": "en",
+  "sentiment": {
+    "positive": 0.62,
+    "negative": 0.21,
+    "neutral": 0.17
+  },
+  "pros": [
+    "Excellent battery life",
+    "Fast performance"
+  ],
+  "cons": [
+    "Average camera",
+    "Heats up under load"
+  ],
+  "summary": "A strong performer with excellent battery life, but camera quality may disappoint.",
+  "confidence": 0.81
+}
+
+
+-- without considering the images or videos or any attachments added to it.
+

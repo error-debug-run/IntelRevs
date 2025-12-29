@@ -8,6 +8,7 @@ import (
 	"github.com/error-debug-run/go-scraper/internal/detector"
 	"github.com/error-debug-run/go-scraper/internal/parser"
 	"github.com/error-debug-run/go-scraper/internal/parser/site_alloc"
+	"github.com/error-debug-run/go-scraper/internal/parser/site_alloc/reddit"
 	"github.com/error-debug-run/go-scraper/internal/worker"
 )
 
@@ -23,21 +24,21 @@ func RunScrapeJob(url string) (*ScrapeResult, error) {
 		return nil, errors.New("empty url")
 	}
 
+	// 1️⃣ Detect site
 	site := detector.DetectSite(url)
 
+	// 2️⃣ Select parser
 	var p parser.Parser
 	switch site {
 	case detector.SiteAmazon:
 		p = site_alloc.NewAmazonParser()
 	case detector.SiteReddit:
-		p = site_alloc.NewRedditParser()
+		p = reddit.NewRedditParser()
 	case detector.SiteFlipkart:
 		p = site_alloc.NewFlipkartParser()
 	default:
 		p = site_alloc.NewGenericParser()
 	}
-
-	w := worker.NewHTTPWorker()
 
 	var allReviews []string
 	currentURL := url
@@ -50,22 +51,39 @@ func RunScrapeJob(url string) (*ScrapeResult, error) {
 			break
 		}
 
-		html, err := w.FetchHTML(currentURL)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println("Fetched HTML length:", len(html))
+		var content string
+		var err error
 
-		reviews, err := p.Parse(html)
+		// 3️⃣ Fetch page (DIFFERENT for Reddit)
+		if site == detector.SiteReddit {
+			content, err = worker.FetchPage(currentURL)
+		} else {
+			httpWorker := worker.NewHTTPWorker()
+			content, err = httpWorker.FetchHTML(currentURL)
+		}
+
 		if err != nil {
 			return nil, err
 		}
-		println("PARSED REVIEWS COUNT:", len(reviews))
-		println("HTML LENGTH:", len(html))
+
+		fmt.Println("FETCHED CONTENT LENGTH:", len(content))
+
+		// 4️⃣ Parse content
+		reviews, err := p.Parse(content)
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Println("PARSED REVIEWS COUNT:", len(reviews))
 
 		allReviews = append(allReviews, reviews...)
 
-		next := parser.FindNextPage(html)
+		// 5️⃣ Pagination (HTML only for now)
+		if site == detector.SiteReddit {
+			break // pagination handled later via Reddit JSON
+		}
+
+		next := parser.FindNextPage(content)
 		if next == "" {
 			break
 		}
@@ -74,6 +92,7 @@ func RunScrapeJob(url string) (*ScrapeResult, error) {
 		pageCount++
 	}
 
+	// 6️⃣ Final result
 	return &ScrapeResult{
 		URL:       url,
 		Reviews:   allReviews,
