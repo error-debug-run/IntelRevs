@@ -1,26 +1,49 @@
 package detector
 
-import "strings"
-
-type SiteType string
-
-const (
-	SiteAmazon   SiteType = "amazon"
-	SiteFlipkart SiteType = "flipkart"
-	SiteReddit   SiteType = "reddit"
-	SiteGeneric  SiteType = "generic"
+import (
+	"net/url"
+	"strings"
 )
 
-func DetectSite(url string) SiteType {
-	u := strings.ToLower(url)
+const (
+	SiteReddit   = "reddit"
+	SiteAmazon   = "amazon"
+	SiteFlipkart = "flipkart"
+	SiteGeneric  = "generic"
+)
+
+// Detect determines the source site for a given URL.
+//
+// The detection logic is intentionally simple and conservative.
+// It relies only on hostname inspection and string matching.
+//
+// Guarantees:
+// - No network calls
+// - Deterministic output
+// - Always returns a value (fallback to generic)
+//
+// NOTE:
+// Incorrect detection does not break the pipeline;
+// adapters will handle mismatches downstream.
+func Detect(rawURL string) string {
+
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return SiteGeneric
+	}
+
+	host := strings.ToLower(parsed.Host)
 
 	switch {
-	case strings.Contains(u, "amazon."):
-		return SiteAmazon
-	case strings.Contains(u, "flipkart."):
-		return SiteFlipkart
-	case strings.Contains(u, "reddit.com"):
+	case strings.Contains(host, "reddit.com"):
 		return SiteReddit
+
+	case strings.Contains(host, "amazon."):
+		return SiteAmazon
+
+	case strings.Contains(host, "flipkart."):
+		return SiteFlipkart
+
 	default:
 		return SiteGeneric
 	}

@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "source": "reddit",
+    "input_url": "https://reddit.com/r/...",
+    "language": "en",
+    "fetched_at": "2026-01-03T18:30:00Z"
+  },
+  "documents": [
+    {
+      "id": "doc_001",
+      "text": "I love the battery life of this phone.",
+      "role": "post",
+      "score": 120
+    },
+    {
+      "id": "doc_002",
+      "text": "Camera is average in low light.",
+      "role": "comment",
+      "parent_id": "doc_001",
+      "score": 42
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset_001",
+      "type": "image",
+      "url": "https://i.redd.it/xyz.jpg",
+      "linked_doc_id": "doc_002"
+    }
+  ],
+  "source_stats": {
+    "document_count": 2,
+    "asset_count": 1
+  }
+}

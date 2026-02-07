@@ -17,17 +17,24 @@
 
 
 ### No architectural changes needed till now.
-|
-|
-|
-|
-|
+
+
+
 # DATE: 29/12/2025
 
 ## Current status
 
-### * **Change of architecture for reddit instead of using filter inside of go JSON is being sent directly to python to let python do whatever filtering and classification is needed to do with it**
+###  **Change of architecture for reddit instead of using filter inside of go JSON is being sent directly to python to let python do whatever filtering and classification is needed to do with it**
 ### First try to do a file I/O system through the colly (HTTP) failed and now trying to implement streaming service to tackle with the problem.
 
 
 # _New reddit subfolder for better fetching and scraping cause it's using JSON and is JS heavy._
+
+
+# DATE: 03/01/2026
+## Restarting go again cause couldn't figure out the errors returned by go and also the internal server errors
+
+### Example for a model input to look like -> input.txt
+
+# DATE: 01/02/2026 
+## Have been a month since last work and glad that still continuing.
